@@ -1,0 +1,23 @@
+import { Hono } from 'hono';
+import { sign } from 'hono/jwt';
+import { string, z } from 'zod';
+
+const app = new Hono();
+app.get("/", (c) => {
+  return c.text("i got you")
+})
+const User = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  username: z.string(),
+})
+app.post('/users/signup', async (c) => {
+  let { username, password, email } = await c.req.json()
+  let user = User.safeParse({ username, password, email })
+  if (!user.success) {
+    return c.text("invalid username or password")
+  }
+  return c.text("user registered")
+});
+
+export default app;
